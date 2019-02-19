@@ -19,13 +19,12 @@ function getAccessToken($appkey, $appsecret) {
 }
 $access_token = getAccessToken(APP_KEY, APP_SECRET);
 if ($access_token) {
-    $code = $_POST['authCode'];
-    // 通过authcode和accesstoken获取哦用户信息
-    $res = Http::get("/user/getuserinfo",
+    //获取部门列表
+    $res = Http::get("/department/list_ids",
     array(
         "access_token" => $access_token,
-        "code" => $code,
     ));
+    var_dump($res);exit;
     if ($res->errcode == 0) {
         $user = Http::get("/user/get",
         array(
