@@ -23,6 +23,7 @@ if ($access_token) {
     $res = Http::get("/department/list_ids",
     array(
         "access_token" => $access_token,
+        "id" => 1, //默认根部门
     ));
     var_dump($res);exit;
     if ($res->errcode == 0) {
