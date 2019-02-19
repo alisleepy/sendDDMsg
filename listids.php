@@ -25,22 +25,11 @@ if ($access_token) {
         "access_token" => $access_token,
         "id" => 1, //默认根部门
     ));
-    var_dump($res);exit;
     if ($res->errcode == 0) {
-        $user = Http::get("/user/get",
-        array(
-            "access_token" => $access_token,
-            "userid" => $res->userid,
-        ));
-        if ($res->errcode == 0) {
-            echo json_encode(array(
-                "result" => array('userId' => $res->userid, 'userName' => $user->name),
-            ));
-        } else {
-            Log::e('获取用户信息错误，'.$user->errmsg);
-        }
+        $list_ids = json_decode($res->sub_dept_id_list, true);
+        var_dump($list_ids);exit;
     } else {
-        Log::e('获取用户ID错误，'.$res->errmsg);
+        Log::e('获取部门ids失败，'.$res->errmsg);
     }
 }
 
