@@ -2,7 +2,7 @@
 require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . "/util/Http.php");
 require_once(__DIR__ . "/util/Log.php");
-error_reporting(false); //
+error_reporting(false); //禁止错误信息输出
 
 
 function getAccessToken($appkey, $appsecret) {
