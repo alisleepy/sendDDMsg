@@ -38,12 +38,14 @@ if ($access_token) {
                 if($userIdsArr){
                     //获取用户信息
                     foreach($userIdsArr as $userid){
-                        $userInfo = getUserInfo($access_token, $userid);
-                        //var_dump($userInfo);exit;
-                        //把用户userid和mobile保存起来，下次使用时直接获取
-                        //saveUseridAndMobile($userInfo);
-                        //发送工作通知
-                        sendWordMessage($access_token, $userInfo);
+                        if($userid == 'manager232'){
+                            $userInfo = getUserInfo($access_token, $userid);
+                            //var_dump($userInfo);exit;
+                            //把用户userid和mobile保存起来，下次使用时直接获取
+                            //saveUseridAndMobile($userInfo);
+                            //发送工作通知
+                            sendWordMessage($access_token, $userInfo);
+                        }
                     }
                 }
             }
@@ -87,7 +89,6 @@ function getUserInfo($access_token, $userid){
         Log::e('access_token或userid缺失');
         return '';
     }
-    $userid = 'manager232';
     $res = Http::get("/user/get",
     array(
         "access_token" => $access_token,
@@ -146,11 +147,11 @@ function sendWordMessage($access_token, $userInfo){
         "userid_list"  => $userid_list,
         "msg"          => $msg
     ));
-    var_dump($res);
+    $resArr = object2array($res);
+    echo '<pre>';
+    print_r($resArr);exit;
     if($res->errcode != 0){
         Log::e('工作通知发送失败，'.$res->errmsg);
         return '';
     }
-    $resArr = object2array($res);
-    var_dump($resArr);exit;
 }
