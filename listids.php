@@ -20,12 +20,10 @@ function getAccessToken($appkey, $appsecret) {
 $access_token = getAccessToken(APP_KEY, APP_SECRET);
 if ($access_token) {
     //获取部门列表
-    //$res = Http::get("/department/list_ids",
-    $res = Http::get("/department/list",
+    $res = Http::get("/department/list_ids",
     array(
         "access_token" => $access_token,
-        //"id" => 1, //默认根部门
-        "id" => "", //默认根部门
+        "id" => 1, //默认根部门
     ));
     var_dump($res);exit;
     if ($res->errcode != 0) {
@@ -66,7 +64,7 @@ function object2array($object) {
 //获取部门用户ids列表
 function getDeptMember($access_token, $deptid){
     if(!$access_token || !$deptid){
-        Log::e('access_token或deptid确实');
+        Log::e('access_token或deptid缺失');
     }
     $res = Http::get("/user/getDeptMember",
     array(
