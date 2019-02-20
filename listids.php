@@ -26,24 +26,23 @@ if ($access_token) {
         "id" => 1, //默认根部门
     ));
     if ($res->errcode == 0) {
-        $list_ids_arr = object2array($list_ids);
-        var_dump($list_ids_arr);exit;
+        $resArr = object2array($res);
+        var_dump($resArr);exit;
     } else {
         Log::e('获取部门ids失败，'.$res->errmsg);
     }
 }
 //对象转数组
-function object2array($obj) {
-    $obj = (array)$obj;
-    foreach ($obj as $k => $v) {
-        if (gettype($v) == 'resource') {
-            return;
-        }
-        if (gettype($v) == 'object' || gettype($v) == 'array') {
-            $obj[$k] = (array)object_to_array($v);
+function object2array($object) {
+    if (is_object($object)) {
+        foreach ($object as $key => $value) {
+            $array[$key] = $value;
         }
     }
-    return $obj;
+    else {
+        $array = $object;
+    }
+    return $array;
 }
 
 
