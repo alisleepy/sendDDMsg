@@ -40,6 +40,8 @@ if ($access_token) {
                     foreach($userIdsArr as $userid){
                         $userInfo = getUserInfo($access_token, $userid);
                         var_dump($userInfo);exit;
+                        //把用户userid和mobile保存起来，下次使用时直接获取
+                        //saveUseridAndMobile($userInfo);
                         //发送工作通知
                         sendWordMessage();
                     }
@@ -64,6 +66,7 @@ function object2array($object) {
 function getDeptMember($access_token, $deptid){
     if(!$access_token || !$deptid){
         Log::e('access_token或deptid缺失');
+        return '';
     }
     $res = Http::get("/user/getDeptMember",
     array(
@@ -72,6 +75,7 @@ function getDeptMember($access_token, $deptid){
     ));
     if($res->errcode != 0){
         Log::e('获取部门用户ids失败，'.$res->errmsg);
+        return '';
     }
     $resArr = object2array($res);
     $userIdsArr = $resArr['userIds'];
@@ -80,14 +84,51 @@ function getDeptMember($access_token, $deptid){
 //获取用户信息
 function getUserInfo($access_token, $userid){
     if(!$access_token || !$userid){
-        return [];
+        Log::e('access_token或userid缺失');
+        return '';
     }
+    $userid = 'manager232';
     $res = Http::get("/user/get",
     array(
         "access_token" => $access_token,
         "userid" => $userid, //用户id
     ));
-    var_dump($res);exit;
+    if($res->errcode != 0){
+        Log::e('获取用户信息失败，'.$res->errmsg);
+        return '';
+    }
+    $resArr = object2array($res);
+    return $resArr;
 }
+//保存用户信息，下次使用
+function saveUseridAndMobile($userInfo){
+    if(empty($userInfo)){
+        return '';
+    }
+    //连接mysql
+    $conn = mysqlConnect();
+    if($conn == false){
+        Log::e('数据库连接失败');
+        return '';
+    }
+    //执行sql语句
+    query($conn, $sql);
 
+}
+//连接mysql
+function mysqlConnect(){
+    $servername = DB_SERVERNAME;
+    $username   = DB_USERNAME;
+    $password   = DB_PASSWORD;
+    //创建连接
+    $conn = new mysqli($servername, $username, $password);
+    if($conn->connect_error){
+        return false;
+    }
+    return $conn;
+}
+//执行sql语句
+function query($conn, $sql){
+
+}
 
