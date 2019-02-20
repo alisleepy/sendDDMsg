@@ -33,7 +33,17 @@ if ($access_token) {
         if($sub_dept_id_list){
             foreach($sub_dept_id_list as $deptid){
                 //获取部门用户ids
-                getDeptMember($access_token, $deptid);
+                $userIdsArr = getDeptMember($access_token, $deptid);
+                //获取用户的信息
+                if($userIdsArr){
+                    //获取用户信息
+                    foreach($userIdsArr as $userid){
+                        $userInfo = getUserInfo($access_token, $userid);
+                        var_dump($userInfo);exit;
+                        //发送工作通知
+                        sendWordMessage();
+                    }
+                }
             }
         }
     }
@@ -58,10 +68,26 @@ function getDeptMember($access_token, $deptid){
     $res = Http::get("/user/getDeptMember",
     array(
         "access_token" => $access_token,
-        "deptId" => $deptid, //默认根部门
+        "deptId" => $deptid, //部门id
+    ));
+    if($res->errcode != 0){
+        Log::e('获取部门用户ids失败，'.$res->errmsg);
+    }
+    $resArr = object2array($res);
+    $userIdsArr = $res['userIds'];
+    return $userIdsArr ? $userIdsArr : [];
+}
+//获取用户信息
+function getUserInfo($access_token, $userid){
+    if(!$access_token || !$userid){
+        return [];
+    }
+    $res = Http::get("/user/get",
+    array(
+        "access_token" => $access_token,
+        "userid" => $userid, //用户id
     ));
     var_dump($res);exit;
 }
-
 
 
