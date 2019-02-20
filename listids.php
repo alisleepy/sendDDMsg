@@ -39,11 +39,11 @@ if ($access_token) {
                     //获取用户信息
                     foreach($userIdsArr as $userid){
                         $userInfo = getUserInfo($access_token, $userid);
-                        var_dump($userInfo);exit;
+                        //var_dump($userInfo);exit;
                         //把用户userid和mobile保存起来，下次使用时直接获取
                         //saveUseridAndMobile($userInfo);
                         //发送工作通知
-                        sendWordMessage();
+                        sendWordMessage($access_token, $userInfo);
                     }
                 }
             }
@@ -131,4 +131,26 @@ function mysqlConnect(){
 function query($conn, $sql){
 
 }
-
+//发送通知
+function sendWordMessage($access_token, $userInfo){
+    if(!$userInfo){
+        return '';
+    }
+    $agent_id = AGENT_ID;
+    $userid_list = $userInfo['userid'];
+    $msg = '{"msgtype":"text","text":{"content":"【想帮帮】您好，王凯凯提交了新订单，请及时处理'.date('Y-m-d H:i').'"}}';
+    $res = Http::get("/message/corpconversation/asyncsend_v2",
+    array(
+        "access_token" => $access_token,
+        "agent_id"     => $agent_id, //agent_id
+        "userid_list"  => $userid_list,
+        "msg"          => $msg
+    ));
+    var_dump($res);
+    if($res->errcode != 0){
+        Log::e('工作通知发送失败，'.$res->errmsg);
+        return '';
+    }
+    $resArr = object2array($res);
+    var_dump($resArr);exit;
+}
