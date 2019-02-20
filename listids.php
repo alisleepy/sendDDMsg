@@ -140,13 +140,22 @@ function sendWordMessage($access_token, $userInfo){
     $agent_id = AGENT_ID;
     $userid_list = $userInfo['userid'];
     $msg = '{"msgtype":"text","text":{"content":"【想帮帮】您好，王凯凯提交了新订单，请及时处理'.date('Y-m-d H:i').'"}}';
-    $res = Http::post("/message/corpconversation/asyncsend_v2",
-    array(
-        "access_token" => $access_token,
-        "agent_id"     => $agent_id, //agent_id
-        "userid_list"  => $userid_list,
-        "msg"          => $msg
-    ));
+    // $res = Http::post("/message/corpconversation/asyncsend_v2",
+    // array(
+    //     "access_token" => $access_token,
+    //     "agent_id"     => $agent_id, //agent_id
+    //     "userid_list"  => $userid_list,
+    //     "msg"          => $msg
+    // ));
+
+    $url = 'https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token='.$access_token;
+    $post_data['agent_id'] = $agent_id;
+    $post_data['userid_list'] = $userid_list;
+    $post_data['msg'] = $msg;
+
+    $res = request_post($url, $post_data);
+    var_dump($res);exit;
+
     $resArr = object2array($res);
     echo '<pre>';
     print_r($resArr);exit;
@@ -154,4 +163,34 @@ function sendWordMessage($access_token, $userInfo){
         Log::e('工作通知发送失败，'.$res->errmsg);
         return '';
     }
+}
+/**
+ * 模拟post进行url请求
+ * @param string $url
+ * @param array $post_data
+ */
+function request_post($url = '', $post_data = array()) {
+    if (empty($url) || empty($post_data)) {
+        return false;
+    }
+    
+    $o = "";
+    foreach ( $post_data as $k => $v ) 
+    { 
+        $o.= "$k=" . urlencode( $v ). "&" ;
+    }
+    $post_data = substr($o,0,-1);
+
+    $postUrl = $url;
+    $curlPost = $post_data;
+    $ch = curl_init();//初始化curl
+    curl_setopt($ch, CURLOPT_URL,$postUrl);//抓取指定网页
+    curl_setopt($ch, CURLOPT_HEADER, 0);//设置header
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//要求结果为字符串且输出到屏幕上
+    curl_setopt($ch, CURLOPT_POST, 1);//post提交方式
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost);
+    $data = curl_exec($ch);//运行curl
+    curl_close($ch);
+    
+    return $data;
 }
