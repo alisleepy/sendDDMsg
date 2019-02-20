@@ -25,11 +25,17 @@ if ($access_token) {
         "access_token" => $access_token,
         "id" => 1, //默认根部门
     ));
-    if ($res->errcode == 0) {
-        $resArr = object2array($res);
-        var_dump($resArr);exit;
-    } else {
+    if ($res->errcode != 0) {
         Log::e('获取部门ids失败，'.$res->errmsg);
+    } else {
+        $resArr = object2array($res);
+        $sub_dept_id_list = $resArr['sub_dept_id_list']; //部门id列表
+        if($sub_dept_id_list){
+            foreach($sub_dept_id_list as $deptid){
+                //获取部门用户ids
+                getDeptMember($access_token, $deptid);
+            }
+        }
     }
 }
 //对象转数组
@@ -43,6 +49,18 @@ function object2array($object) {
         $array = $object;
     }
     return $array;
+}
+//获取部门用户ids列表
+function getDeptMember($access_token, $deptid){
+    if(!$access_token || !$deptid){
+        Log::e('access_token或deptid确实');
+    }
+    $res = Http::get("/user/getDeptMember",
+    array(
+        "access_token" => $access_token,
+        "deptId" => $deptid, //默认根部门
+    ));
+    var_dump($res);exit;
 }
 
 
