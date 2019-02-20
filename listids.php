@@ -140,7 +140,7 @@ function sendWordMessage($access_token, $userInfo){
     $agent_id = AGENT_ID;
     $userid_list = $userInfo['userid'];
     $msg = '{"msgtype":"text","text":{"content":"【想帮帮】您好，王凯凯提交了新订单，请及时处理'.date('Y-m-d H:i').'"}}';
-    $res = Http::get("/message/corpconversation/asyncsend_v2",
+    $res = Http::post("/message/corpconversation/asyncsend_v2",
     array(
         "access_token" => $access_token,
         "agent_id"     => $agent_id, //agent_id
