@@ -25,7 +25,6 @@ if ($access_token) {
         "access_token" => $access_token,
         "id" => 1, //默认根部门
     ));
-    var_dump($res);exit;
     if ($res->errcode != 0) {
         Log::e('获取部门ids失败，'.$res->errmsg);
     } else {
