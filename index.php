@@ -1,3 +1,3 @@
 <?php
-echo "Welcome";
+echo "国际惯例：hellow world";
 ?>
