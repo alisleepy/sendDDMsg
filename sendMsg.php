@@ -2,9 +2,44 @@
 require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . "/util/Http.php");
 require_once(__DIR__ . "/util/Log.php");
+require_once(__DIR__ . "/db.php");
 error_reporting(false); //禁止错误信息输出
 
-
+$access_token = getAccessToken(APP_KEY, APP_SECRET);
+if(!$access_token){
+    Log::e('access_token获取失败');
+}else{
+    //获取部门列表
+    $sub_dept_id_list = getdeptlist($access_token);
+    if(!$sub_dept_id_list){
+        Log::e('无直属部门');
+    }else{
+        $dbObj = new db();
+        $conn = $dbObj->mysqlConnect();
+        foreach($sub_dept_id_list as $deptid){
+            //获取部门用户ids
+            $userIdsArr = getDeptMember($access_token, $deptid);
+            if(!$userIdsArr){
+                Log::e('该部门无员工');
+            }else{
+                //获取用户信息
+                foreach($userIdsArr as $userid){
+                    if($userid == 'manager232'){
+                        $userInfo = getUserInfo($access_token, $userid);
+                        //把用户userid和mobile保存起来，下次使用时直接获取
+                        
+                        //saveUseridAndMobile($userInfo);
+                        //发送工作通知
+                        sendWordMessage($access_token, $userInfo);
+                    }
+                }
+            }
+        }
+        //关闭mysql连接
+        $dbObj->mysqlClose($conn); 
+    }
+}
+//获取access_token
 function getAccessToken($appkey, $appsecret) {
     $ret = Http::get("/gettoken",
     array(
@@ -17,41 +52,6 @@ function getAccessToken($appkey, $appsecret) {
     }
     return $ret->access_token;
 }
-$access_token = getAccessToken(APP_KEY, APP_SECRET);
-if ($access_token) {
-    //获取部门列表
-    $res = Http::get("/department/list_ids",
-    array(
-        "access_token" => $access_token,
-        "id" => 1, //默认根部门
-    ));
-    if ($res->errcode != 0) {
-        Log::e('获取部门ids失败，'.$res->errmsg);
-    } else {
-        $resArr = object2array($res);
-        $sub_dept_id_list = $resArr['sub_dept_id_list']; //部门id列表
-        if($sub_dept_id_list){
-            foreach($sub_dept_id_list as $deptid){
-                //获取部门用户ids
-                $userIdsArr = getDeptMember($access_token, $deptid);
-                //获取用户的信息
-                if($userIdsArr){
-                    //获取用户信息
-                    foreach($userIdsArr as $userid){
-                        if($userid == 'manager232'){
-                            $userInfo = getUserInfo($access_token, $userid);
-                            //var_dump($userInfo);exit;
-                            //把用户userid和mobile保存起来，下次使用时直接获取
-                            //saveUseridAndMobile($userInfo);
-                            //发送工作通知
-                            sendWordMessage($access_token, $userInfo);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 //对象转数组
 function object2array($object) {
     if (is_object($object)) {
@@ -63,6 +63,25 @@ function object2array($object) {
         $array = $object;
     }
     return $array;
+}
+/*
+ * 获取部门列表ids
+ * @param string $access_token 
+ * @return array $sub_dept_id_list   部门ids
+ */ 
+function getdeptlist($access_token){
+    $res = Http::get("/department/list_ids",
+    array(
+        "access_token" => $access_token,
+        "id" => 1, //默认根部门
+    ));
+    if($res->errcode != 0){
+        Log::e('获取部门ids失败，'.$res->errmsg);
+    }else{
+        $resArr = object2array($res);
+        $sub_dept_id_list = $resArr['sub_dept_id_list']; //部门id列表
+        return $sub_dept_id_list ? $sub_dept_id_list : [];
+    }
 }
 //获取部门用户ids列表
 function getDeptMember($access_token, $deptid){
@@ -100,36 +119,6 @@ function getUserInfo($access_token, $userid){
     }
     $resArr = object2array($res);
     return $resArr;
-}
-//保存用户信息，下次使用
-function saveUseridAndMobile($userInfo){
-    if(empty($userInfo)){
-        return '';
-    }
-    //连接mysql
-    $conn = mysqlConnect();
-    if($conn == false){
-        Log::e('数据库连接失败');
-        return '';
-    }
-    //执行sql语句
-    query($conn, $sql);
-}
-//连接mysql
-function mysqlConnect(){
-    $servername = DB_SERVERNAME;
-    $username   = DB_USERNAME;
-    $password   = DB_PASSWORD;
-    //创建连接
-    $conn = new mysqli($servername, $username, $password);
-    if($conn->connect_error){
-        return false;
-    }
-    return $conn;
-}
-//执行sql语句
-function query($conn, $sql){
-
 }
 //发送通知
 function sendWordMessage($access_token, $userInfo){

@@ -7,5 +7,9 @@
 1.更新config.php文件中的配置参数。  
 具体数值值请登录[E应用列表](https://open-dev.dingtalk.com/#/appList)，从您需要调试的企业内应用的配置详情中获取.
 
-## 项目运行
-1. /login.php  获取用户登录信息
+2.把用户放在某个直属子部门内，比如：工程师部门
+
+## 文件描述：
+1. sendMsg.php  发送钉钉消息
+2. db.php  连接mysql
+3. saveUser.php  保存用户信息
